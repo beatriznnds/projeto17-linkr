@@ -1,4 +1,8 @@
-import connection from "../database.js";
+import connection from "../database.js"
+
+async function insertSession(token, userId){
+    return connection.query(`INSERT INTO sessions (token, "userId") VALUES ($1, $2)`, [token, userId])
+}
 
 async function addNewUser (email, passwordHash, username, profilePic) {
     return connection.query(`INSERT INTO users (email, password, username, "profilePic")
@@ -11,5 +15,6 @@ async function searchByEmail (email) {
 
 export const authRepository = {
     addNewUser,
-    searchByEmail
+    searchByEmail,
+    insertSession
 }
