@@ -17,5 +17,22 @@ export async function signIn(req, res){
         console.error(error);
         res.sendStatus(500);
     }
+}
 
+export async function signUp (req, res) {
+    const { email, password, username, profilePic } = req.body;
+    const passwordHash = bcrypt.hashSync(password, 10);
+    
+    try {
+        const { rows: unvalidEmail } = await authRepository.searchByEmail(email);
+        if (unvalidEmail.length !== 0) {
+            return res.status(409).send({ error: 'This e-mail is already registered.'});
+        }
+        
+        await authRepository.addNewUser(email, passwordHash, username, profilePic);
+        res.sendStatus(201);
+    } catch (e) {
+        console.log(e)
+        res.sendStatus(500);
+    }
 }
