@@ -5,6 +5,6 @@ import signUpSchema from '../schemas/signUpSchema.js';
 
 const router = Router();
 
-router.post('/signup', schemaValidation(signUpSchema), signUp);
+router.post('/sign-up', schemaValidation(signUpSchema), signUp);
 
 export default router;
