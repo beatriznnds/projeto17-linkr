@@ -1,0 +1,15 @@
+CREATE TABLE "users" (
+	"id" SERIAL PRIMARY KEY,
+	"email" TEXT NOT NULL UNIQUE,
+	"password" TEXT NOT NULL,
+	"username" TEXT NOT NULL UNIQUE,
+	"profilePic" TEXT NOT NULL,
+	"createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE "sessions" (
+	"id" SERIAL PRIMARY KEY,
+	"userId" INTEGER NOT NULL,
+	"token" TEXT NOT NULL,
+	"createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
+);
