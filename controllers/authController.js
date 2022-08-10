@@ -14,7 +14,7 @@ export async function signIn(req, res) {
     const token = uuid();
     await authRepository.insertSession(token, user[0].id);
     res
-      .send({ token, name: user[0].name, profilePic: user[0].profilePic })
+      .send({ token, name: user[0].username, profilePic: user[0].profilePic })
       .status(200);
   } catch (error) {
     console.error(error);
