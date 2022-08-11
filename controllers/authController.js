@@ -65,9 +65,8 @@ export async function logout(req, res) {
     const { authorization } = req.headers;
     const token = authorization?.replace("Bearer", "").trim();
     console.log(token);
-
     const { rows: validToken } = await authRepository.searchToken(token)
-
+    console.log(validToken)
     if (validToken.length === 0) {
       return res.sendStatus(404);
     }
