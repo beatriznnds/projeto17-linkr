@@ -6,19 +6,46 @@ import connection from "../database.js";
 export async function signIn(req, res) {
   const { email, password } = req.body;
 
+  //user validation
+  const { rows: userValidation } = await connection.query(
+    "SELECT * FROM users WHERE email = $1",
+    [email]
+  );
+
+  if (userValidation.length < 1) {
+    res.sendStatus(401);
+    return;
+  }
+
+  const comparePassword = bcrypt.compareSync(
+    password,
+    userValidation[0].password
+  );
+
+  if (!comparePassword) {
+    res.sendStatus(401);
+    return;
+  }
   try {
-    const { rows: user } = await authRepository.searchByEmail(email);
-    if (user[0] && bcrypt.compareSync(password, user[0].password)) {
-      const token = uuid();
-      await authRepository.insertSession(token, user[0].id);
-      return res
-            .send({ token, name: user[0].username, profilePic: user[0].profilePic })
-            .status(200);
-    }
-    res.send("Usuário ou senha inválidos!").status(400);
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
+    //Token generatioin
+    const token = uuid();
+
+    await connection.query(
+      'INSERT INTO sessions ("userId","token") VALUES ($1, $2)',
+      [userValidation[0].id, token]
+    );
+
+    console.log(userValidation[0].username, userValidation[0].profilePic);
+
+    res
+      .send({
+        token,
+        name: userValidation[0].username,
+        profilePic: userValidation[0].profilePic,
+      })
+      .status(200);
+  } catch {
+    res.sendStatus(400);
   }
 }
 
@@ -43,8 +70,18 @@ export async function signUp(req, res) {
 }
 
 export async function logout(req, res) {
-  const token = res.locals.token;
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer", "").trim();
   console.log(token);
+
+  const { rows: validToken } = await connection.query(
+    `SELECT * FROM sessions WHERE token = $1`,
+    [token]
+  );
+
+  if (validToken.length === 0) {
+    return res.sendStatus(401);
+  }
 
   await authRepository.deleteSessionByToken(token);
 

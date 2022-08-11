@@ -3,15 +3,13 @@ import connection from "../database.js";
 export async function validateToken(req, res, next) {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer", "").trim();
+  console.log(token);
 
   try {
     const { rows: validToken } = await connection.query(
       `SELECT * FROM sessions WHERE token = $1`,
       [token]
     );
-
-    res.locals.validToken = validToken;
-    console.log(validToken);
 
     if (validToken.length === 0) {
       return res.sendStatus(401);
@@ -20,5 +18,8 @@ export async function validateToken(req, res, next) {
   } catch (e) {
     return res.sendStatus(500);
   }
+
+  res.locals.token = token;
+
   next();
 }
