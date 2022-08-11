@@ -1,4 +1,4 @@
-import connection from "../database";
+import connection from "../database.js";
 
 export async function timeline(req, res) {
   const { authorization } = req.headers;
@@ -15,8 +15,9 @@ export async function timeline(req, res) {
   }
 
   try {
-    await connection.query("SELECT * FROM publications");
-    res.sendStatus(200);
+    const { rows: body } = await connection.query("SELECT * FROM publications");
+
+    res.send(body).status(200);
   } catch {
     res.sendStatus(400);
   }
