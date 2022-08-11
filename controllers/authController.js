@@ -8,14 +8,14 @@ export async function signIn(req, res) {
 
   try {
     const { rows: user } = await authRepository.searchByEmail(email);
-    if (!user[0] && !bcrypt.compareSync(password, user[0].password)) {
-      return res.send("Usuário ou senha inválidos!").status(400);
+    if (user[0] && bcrypt.compareSync(password, user[0].password)) {
+      const token = uuid();
+      await authRepository.insertSession(token, user[0].id);
+      return res
+            .send({ token, name: user[0].username, profilePic: user[0].profilePic })
+            .status(200);
     }
-    const token = uuid();
-    await authRepository.insertSession(token, user[0].id);
-    res
-      .send({ token, name: user[0].username, profilePic: user[0].profilePic })
-      .status(200);
+    res.send("Usuário ou senha inválidos!").status(400);
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
