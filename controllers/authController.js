@@ -43,19 +43,10 @@ export async function signUp(req, res) {
 }
 
 export async function logout(req, res) {
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer ", "");
+  const token = res.locals.token;
+  console.log(token);
 
-  const session = await connection.query(
-    "SELECT * FROM sessions WHERE token = $1",
-    [token]
-  );
-
-  if (!session) {
-    return res.sendStatus(401);
-  }
-
-  await connection.query("DELETE FROM sessions WHERE token = $1", [token]);
+  await authRepository.deleteSessionByToken(token);
 
   res.status(201).send("Session ended successfully");
 }
