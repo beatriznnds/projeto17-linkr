@@ -3,32 +3,29 @@ import { authRepository } from "../repositories/authRepository.js";
 import { v4 as uuid } from "uuid";
 
 export async function signIn(req, res) {
-  const { email, password } = req.body;
-
-  //user validation
-  const { rows: userValidation } = await authRepository.searchByEmail(email);
-
-  if (userValidation.length < 1) {
-    res.sendStatus(401);
-    return;
-  }
-
-  const comparePassword = bcrypt.compareSync(
-    password,
-    userValidation[0].password
-  );
-
-  if (!comparePassword) {
-    res.sendStatus(401);
-    return;
-  }
-
   try {
+    const { email, password } = req.body;
+
+    //user validation
+    const { rows: userValidation } = await authRepository.searchByEmail(email);
+
+    if (userValidation.length < 1) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const comparePassword = bcrypt.compareSync(
+      password,
+      userValidation[0].password
+    );
+    if (!comparePassword) {
+      return res.sendStatus(401);
+    }
     //Token generatioin
     const token = uuid();
 
-    await authRepository.insertSession(userValidation[0].id, token);
-
+    await authRepository.insertSession(token, userValidation[0].id);
+    
     res
       .send({
         token,
@@ -37,7 +34,7 @@ export async function signIn(req, res) {
       })
       .status(200);
   } catch {
-    res.sendStatus(400);
+    res.sendStatus(500);
   }
 }
 
@@ -62,17 +59,22 @@ export async function signUp(req, res) {
 }
 
 export async function logout(req, res) {
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer", "").trim();
-  console.log(token);
+  try {
+    const { authorization } = req.headers;
+    const token = authorization?.replace("Bearer", "").trim();
+    console.log(token);
+    const { rows: validToken } = await authRepository.searchToken(token)
+    console.log(validToken)
+    if (validToken.length === 0) {
+      return res.sendStatus(404);
+    }
 
-  const { rows: validToken } = await authRepository.searchToken(token);
+    await authRepository.deleteSessionByToken(token);
 
-  if (validToken.length === 0) {
-    return res.sendStatus(401);
+    res.status(201).send("Session ended successfully");
+    
+  } catch (error) {
+    console.log(e);
+    res.sendStatus(500);
   }
-
-  await authRepository.deleteSessionByToken(token);
-
-  res.status(201).send("Session ended successfully");
 }
