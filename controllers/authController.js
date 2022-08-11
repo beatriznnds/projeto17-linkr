@@ -10,7 +10,7 @@ export async function signIn(req, res) {
     const { rows: userValidation } = await authRepository.searchByEmail(email);
 
     if (userValidation.length < 1) {
-      res.send("User or password incorrect!").status(401);
+      res.sendStatus(401);
       return;
     }
 
@@ -19,7 +19,7 @@ export async function signIn(req, res) {
       userValidation[0].password
     );
     if (!comparePassword) {
-      return res.send("User or password incorrect!").status(401);
+      return res.sendStatus(401);
     }
     //Token generatioin
     const token = uuid();
@@ -71,7 +71,7 @@ export async function logout(req, res) {
 
     await authRepository.deleteSessionByToken(token);
 
-    res.status(201).send("Session ended successfully");
+    res.sendStatus(201);
     
   } catch (error) {
     console.log(e);
