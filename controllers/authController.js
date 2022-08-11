@@ -1,16 +1,12 @@
 import bcrypt from "bcrypt";
 import { authRepository } from "../repositories/authRepository.js";
 import { v4 as uuid } from "uuid";
-import connection from "../database.js";
 
 export async function signIn(req, res) {
   const { email, password } = req.body;
 
   //user validation
-  const { rows: userValidation } = await connection.query(
-    "SELECT * FROM users WHERE email = $1",
-    [email]
-  );
+  const { rows: userValidation } = await authRepository.searchByEmail(email);
 
   if (userValidation.length < 1) {
     res.sendStatus(401);
@@ -26,16 +22,12 @@ export async function signIn(req, res) {
     res.sendStatus(401);
     return;
   }
+
   try {
     //Token generatioin
     const token = uuid();
 
-    await connection.query(
-      'INSERT INTO sessions ("userId","token") VALUES ($1, $2)',
-      [userValidation[0].id, token]
-    );
-
-    console.log(userValidation[0].username, userValidation[0].profilePic);
+    await authRepository.insertSession(userValidation[0].id, token);
 
     res
       .send({
@@ -74,10 +66,7 @@ export async function logout(req, res) {
   const token = authorization?.replace("Bearer", "").trim();
   console.log(token);
 
-  const { rows: validToken } = await connection.query(
-    `SELECT * FROM sessions WHERE token = $1`,
-    [token]
-  );
+  const { rows: validToken } = await authRepository.searchToken(token);
 
   if (validToken.length === 0) {
     return res.sendStatus(401);
