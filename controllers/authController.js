@@ -18,10 +18,8 @@ export async function signIn(req, res) {
       password,
       userValidation[0].password
     );
-
     if (!comparePassword) {
-      res.send("User or password incorrect!").status(401);
-      return;
+      return res.send("User or password incorrect!").status(401);
     }
     //Token generatioin
     const token = uuid();
