@@ -54,17 +54,17 @@ export async function editPost(req, res) {
 
 export async function deletePost (req, res) {
     const { userId } = res.locals;
-    const { id } = req.params;
+    const { publicationId } = req.body;
 
     try {
-        const { rows: validatePost } = await postRepository.searchPostById(id);
+        const { rows: validatePost } = await postRepository.searchPost(publicationId);
           if (validatePost.length === 0) {
             return res.sendStatus(404);
           }
           if (validatePost[0].userId !== userId) {
             return res.sendStatus(401);
           }
-        await postRepository.deletePost(id, userId);
+        await postRepository.deletePost(publicationId, userId);
         res.sendStatus(200);
     } catch (e) {
         res.sendStatus(500);
