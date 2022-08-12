@@ -8,6 +8,6 @@ const postRouter = Router();
 
 postRouter.post('/publish', schemaValidation(newPostSchema), validateToken, newPost);
 postRouter.post('/editpost', validateToken, editPost);
-postRouter.delete('/deletepost/:id', validateToken, deletePost)
+postRouter.delete('/deletepost', validateToken, deletePost)
 
 export default postRouter;
