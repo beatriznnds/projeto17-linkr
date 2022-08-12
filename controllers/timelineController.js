@@ -1,4 +1,5 @@
 import connection from "../database.js";
+import urlMetadata from "url-metadata";
 
 export async function timeline(req, res) {
   const { authorization } = req.headers;
@@ -15,9 +16,11 @@ export async function timeline(req, res) {
   }
 
   try {
-    const { rows: body } = await connection.query("SELECT * FROM publications");
+    const { rows: publications } = await connection.query(
+      'select publications.*, users."username", users."profilePic" FROM publications JOIN users ON publications."userId" = users.id'
+    );
 
-    res.send(body).status(200);
+    res.send(publications).status(200);
   } catch {
     res.sendStatus(400);
   }

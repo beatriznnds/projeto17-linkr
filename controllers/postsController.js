@@ -1,26 +1,53 @@
 import { postRepository } from "../repositories/postRepository.js";
 import urlMetadata from "url-metadata";
-import connection from "../database.js";
 
 export async function newPost(req, res) {
   const { link, description } = req.body;
   const { userId } = res.locals;
-
-  urlMetadata(link).then(
-    function (metadata) {
-      // success handler
-      await connection.query('INSERT INTO publications (url, title, image, description) VALUES ($1, $2, $3)', [metadata.url, metadata.title, metadata.image, metadata.description])
-    },
-    function (error) {
-      // failure handler
-      console.log(error);
-    }
-  );
-
   try {
-    await postRepository.addNewPost(userId, link, description);
+    urlMetadata(link).then(
+      async function (metadata) {
+        // success handler
+        console.log(metadata);
+        await postRepository.addNewPost(
+          userId,
+          link,
+          description,
+          metadata.title,
+          metadata.image,
+          metadata.description
+        );
+      },
+      function (error) {
+        // failure handler
+        console.log(error, "esse");
+      }
+    );
     return res.sendStatus(201);
   } catch (e) {
+    console.log(e);
+    res.sendStatus(500);
+  }
+}
+
+export async function editPost(req, res) {
+  const { publicationId, description } = req.body;
+  const { userId } = res.locals;
+
+  try {
+    const { rows: validatePost } = await postRepository.searchPost(
+      publicationId
+    );
+    if (validatePost.length === 0) {
+      return res.sendStatus(404);
+    }
+    if (validatePost[0].userId !== userId) {
+      return res.sendStatus(401);
+    }
+    await postRepository.editPost(description, publicationId, userId);
+    res.sendStatus(200);
+  } catch (e) {
+    console.log(e);
     res.sendStatus(500);
   }
 }

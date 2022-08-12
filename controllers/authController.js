@@ -71,7 +71,7 @@ export async function logout(req, res) {
 
     await authRepository.deleteSessionByToken(token);
 
-    res.sendStatus(201);
+    res.status(201).send("Session ended successfully");
     
   } catch (error) {
     console.log(e);
