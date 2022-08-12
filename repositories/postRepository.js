@@ -23,12 +23,24 @@ async function editPost(description, publicationId, userId) {
 
 async function searchPost(publicationId) {
   return connection.query(`SELECT * FROM publications WHERE id = $1`, [
-    publicationId,
+    publicationId
   ]);
+}
+
+async function searchPostById(id) {
+    return connection.query(`SELECT * FROM publications WHERE id = $1`, [
+      id
+    ]);
+  }
+
+async function deletePost (id, userId) {
+    return connection.query(`DELETE FROM publications WHERE id = $1 AND "userId" = $2`, [id, userId])
 }
 
 export const postRepository = {
   addNewPost,
   editPost,
   searchPost,
+  deletePost,
+  searchPostById
 };
