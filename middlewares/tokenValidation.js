@@ -3,7 +3,6 @@ import connection from "../database.js";
 export async function validateToken(req, res, next) {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer", "").trim();
-  console.log(token);
 
   try {
     const { rows: validToken } = await connection.query(

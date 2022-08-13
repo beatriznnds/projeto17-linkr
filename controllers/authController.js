@@ -25,7 +25,7 @@ export async function signIn(req, res) {
     const token = uuid();
 
     await authRepository.insertSession(token, userValidation[0].id);
-    
+
     res
       .send({
         token,
@@ -62,9 +62,9 @@ export async function logout(req, res) {
   try {
     const { authorization } = req.headers;
     const token = authorization?.replace("Bearer", "").trim();
-    console.log(token);
-    const { rows: validToken } = await authRepository.searchToken(token)
-    console.log(validToken)
+
+    const { rows: validToken } = await authRepository.searchToken(token);
+
     if (validToken.length === 0) {
       return res.sendStatus(404);
     }
@@ -72,7 +72,6 @@ export async function logout(req, res) {
     await authRepository.deleteSessionByToken(token);
 
     res.status(201).send("Session ended successfully");
-    
   } catch (error) {
     console.log(e);
     res.sendStatus(500);
