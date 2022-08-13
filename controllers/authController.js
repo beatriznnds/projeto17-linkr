@@ -1,41 +1,30 @@
 import bcrypt from "bcrypt";
 import { authRepository } from "../repositories/authRepository.js";
 import { v4 as uuid } from "uuid";
-import connection from "../database.js";
 
 export async function signIn(req, res) {
-  const { email, password } = req.body;
-
-  //user validation
-  const { rows: userValidation } = await connection.query(
-    "SELECT * FROM users WHERE email = $1",
-    [email]
-  );
-
-  if (userValidation.length < 1) {
-    res.sendStatus(401);
-    return;
-  }
-
-  const comparePassword = bcrypt.compareSync(
-    password,
-    userValidation[0].password
-  );
-
-  if (!comparePassword) {
-    res.sendStatus(401);
-    return;
-  }
   try {
+    const { email, password } = req.body;
+
+    //user validation
+    const { rows: userValidation } = await authRepository.searchByEmail(email);
+
+    if (userValidation.length < 1) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const comparePassword = bcrypt.compareSync(
+      password,
+      userValidation[0].password
+    );
+    if (!comparePassword) {
+      return res.sendStatus(401);
+    }
     //Token generatioin
     const token = uuid();
 
-    await connection.query(
-      'INSERT INTO sessions ("userId","token") VALUES ($1, $2)',
-      [userValidation[0].id, token]
-    );
-
-    console.log(userValidation[0].username, userValidation[0].profilePic);
+    await authRepository.insertSession(token, userValidation[0].id);
 
     res
       .send({
@@ -45,7 +34,7 @@ export async function signIn(req, res) {
       })
       .status(200);
   } catch {
-    res.sendStatus(400);
+    res.sendStatus(500);
   }
 }
 
@@ -70,20 +59,21 @@ export async function signUp(req, res) {
 }
 
 export async function logout(req, res) {
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer", "").trim();
-  console.log(token);
+  try {
+    const { authorization } = req.headers;
+    const token = authorization?.replace("Bearer", "").trim();
 
-  const { rows: validToken } = await connection.query(
-    `SELECT * FROM sessions WHERE token = $1`,
-    [token]
-  );
+    const { rows: validToken } = await authRepository.searchToken(token);
 
-  if (validToken.length === 0) {
-    return res.sendStatus(401);
+    if (validToken.length === 0) {
+      return res.sendStatus(404);
+    }
+
+    await authRepository.deleteSessionByToken(token);
+
+    res.status(201).send("Session ended successfully");
+  } catch (error) {
+    console.log(e);
+    res.sendStatus(500);
   }
-
-  await authRepository.deleteSessionByToken(token);
-
-  res.status(201).send("Session ended successfully");
 }

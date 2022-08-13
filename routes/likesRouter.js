@@ -1,7 +1,5 @@
 import { Router } from "express";
 import { validateToken } from "../middlewares/tokenValidation.js";
-import schemaValidation from "../middlewares/schemasValidation.js";
-import likeSchema from '../schemas/likesSchema.js';
 import {
     likePost,
     unlikePost,
@@ -9,14 +7,13 @@ import {
     getCountLikes,
     getNames
 } from '../controllers/likesController.js';
-import { validateParam } from "../middlewares/likesValidation.js";
 
 const like = Router();
 
-like.post('/like', validateToken, schemaValidation(likeSchema), likePost);
-like.get('/like/:id', validateToken, validateParam, getLikes);
-like.delete('/like/:id', validateToken, validateParam, unlikePost);
-like.get('/like/count/:id', validateParam, getCountLikes);
-like.get('/like/names/:id', validateToken, validateParam, getNames);
+like.post('/like', validateToken, likePost);
+like.get('/like', validateToken, getLikes);
+like.delete('/like', validateToken, unlikePost);
+like.get('/like/count', getCountLikes);
+like.get('/like/names', validateToken, getNames);
 
 export default like;
