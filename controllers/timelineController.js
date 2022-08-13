@@ -16,7 +16,7 @@ export async function timeline(req, res) {
 
   try {
     const { rows: publications } = await connection.query(
-      'select publications.*, users."username", users."profilePic" FROM publications JOIN users ON publications."userId" = users.id'
+      'select publications.*, users."username", users."profilePic" FROM publications JOIN users ON publications."userId" = users.id ORDER BY publications."createdAt" desc LIMIT 20'
     );
 
     res.send(publications).status(200);
