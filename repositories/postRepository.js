@@ -27,8 +27,20 @@ async function searchPost(publicationId) {
   ]);
 }
 
+async function searchPostById(id) {
+  return connection.query(`SELECT * FROM publications WHERE id = $1`, [id]);
+}
+
+async function deletePost(publicationId) {
+  return connection.query(`DELETE FROM publications WHERE id = $1`, [
+    publicationId,
+  ]);
+}
+
 export const postRepository = {
   addNewPost,
   editPost,
   searchPost,
+  deletePost,
+  searchPostById,
 };
