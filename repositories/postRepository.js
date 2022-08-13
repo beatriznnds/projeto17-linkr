@@ -34,7 +34,7 @@ async function searchPostById(id) {
   }
 
 async function deletePost (publicationId, userId) {
-    return connection.query(`DELETE FROM publications WHERE id = $1 AND "userId" = $2`, [publicationId, userId])
+    return connection.query(`DELETE FROM publications WHERE id = $1`, [publicationId])
 }
 
 export const postRepository = {

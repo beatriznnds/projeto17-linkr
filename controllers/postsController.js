@@ -64,7 +64,7 @@ export async function deletePost (req, res) {
           if (validatePost[0].userId !== userId) {
             return res.sendStatus(401);
           }
-        await postRepository.deletePost(publicationId, userId);
+        await postRepository.deletePost(publicationId);
         res.sendStatus(200);
     } catch (e) {
         res.sendStatus(500);
