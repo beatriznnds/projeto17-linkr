@@ -14,27 +14,27 @@ async function addNewPost(
   );
 }
 
-async function editPost(description, publicationId, userId) {
+async function editPost(description, id) {
   return connection.query(
-    `UPDATE publications SET description = $1 WHERE id = $2 AND "userId" = $3`,
-    [description, publicationId, userId]
+    `UPDATE publications SET description = $1 WHERE id = $2`,
+    [description, id]
   );
 }
 
 async function searchPost(publicationId) {
   return connection.query(`SELECT * FROM publications WHERE id = $1`, [
-    publicationId
+    publicationId,
   ]);
 }
 
 async function searchPostById(id) {
-    return connection.query(`SELECT * FROM publications WHERE id = $1`, [
-      id
-    ]);
-  }
+  return connection.query(`SELECT * FROM publications WHERE id = $1`, [id]);
+}
 
-async function deletePost (publicationId, userId) {
-    return connection.query(`DELETE FROM publications WHERE id = $1`, [publicationId])
+async function deletePost(publicationId) {
+  return connection.query(`DELETE FROM publications WHERE id = $1`, [
+    publicationId,
+  ]);
 }
 
 export const postRepository = {
@@ -42,5 +42,5 @@ export const postRepository = {
   editPost,
   searchPost,
   deletePost,
-  searchPostById
+  searchPostById,
 };

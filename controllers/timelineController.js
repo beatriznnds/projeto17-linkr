@@ -4,7 +4,6 @@ import urlMetadata from "url-metadata";
 export async function timeline(req, res) {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer", "").trim();
-  console.log(token);
 
   const { rows: validToken } = await connection.query(
     `SELECT * FROM sessions WHERE token = $1`,
