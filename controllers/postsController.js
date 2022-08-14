@@ -6,7 +6,7 @@ export async function newPost(req, res) {
   const { link, description } = req.body;
   const { userId } = res.locals;
   try {
-    urlMetadata(link).then(
+    await urlMetadata(link).then(
       async function (metadata) {
         // success handler
 
@@ -32,7 +32,6 @@ export async function newPost(req, res) {
 }
 
 export async function editPost(req, res) {
-  console.log(req.body)
   const { publicationId, description } = req.body;
   const { userId } = res.locals;
 
