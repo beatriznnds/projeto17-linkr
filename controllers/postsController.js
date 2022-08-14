@@ -89,3 +89,76 @@ export async function deletePost(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function likePost(req, res) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer", "").trim();
+  const { id } = req.params;
+
+  const { rows: validToken } = await connection.query(
+    `SELECT * FROM sessions WHERE token = $1`,
+    [token]
+  );
+
+  if (validToken.length === 0) {
+    return res.sendStatus(401);
+  }
+
+  try {
+    await connection.query(
+      'INSERT INTO likes ("userId", "publicationId") VALUES ($1, $2)',
+      [validToken[0].userId, id]
+    );
+    res.sendStatus(201);
+  } catch {
+    res.sendStatus(400);
+  }
+}
+
+export async function likeDelete(req, res) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer", "").trim();
+  const { id } = req.params;
+
+  const { rows: validToken } = await connection.query(
+    `SELECT * FROM sessions WHERE token = $1`,
+    [token]
+  );
+
+  if (validToken.length === 0) {
+    return res.sendStatus(401);
+  }
+
+  try {
+    await connection.query(
+      'DELETE FROM likes WHERE "userId" = $1 AND "publicationId" = $2',
+      [validToken[0].userId, id]
+    );
+
+    res.sendStatus(200);
+  } catch {
+    res.sendStatus(400);
+  }
+}
+
+export async function likeGet(req, res) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer", "").trim();
+  const { id } = req.params;
+  const { rows: validToken } = await connection.query(
+    `SELECT * FROM sessions WHERE token = $1`,
+    [token]
+  );
+
+  if (validToken.length === 0) {
+    return res.sendStatus(401);
+  }
+  const { rows: checkLike } = await connection.query(
+    'SELECT * FROM likes WHERE "publicationId" = $1 AND "userId" = $2',
+    [id, validToken[0].userId]
+  );
+  if (checkLike.length > 0) {
+    return res.send(true).status(200);
+  }
+  return res.send(false).status(200);
+}
