@@ -4,6 +4,9 @@ import {
   newPost,
   editPost,
   deletePost,
+  likePost,
+  likeGet,
+  likeDelete,
 } from "../controllers/postsController.js";
 import newPostSchema from "../schemas/newPostSchema.js";
 import { validateToken } from "../middlewares/tokenValidation.js";
@@ -18,5 +21,8 @@ postRouter.post(
 );
 postRouter.post("/editpost", validateToken, editPost);
 postRouter.delete("/deletepost", deletePost);
+postRouter.post("/likePost/:id", likePost);
+postRouter.delete("/likeDelete/:id", likeDelete);
+postRouter.get("/likeGet/:id", likeGet);
 
 export default postRouter;

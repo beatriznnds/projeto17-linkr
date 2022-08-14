@@ -1,5 +1,4 @@
 import connection from "../database.js";
-import urlMetadata from "url-metadata";
 
 export async function timeline(req, res) {
   const { authorization } = req.headers;
@@ -29,7 +28,6 @@ export async function userTimeline(req, res) {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer", "").trim();
   const { id } = req.params;
-  console.log(id);
 
   const { rows: validToken } = await connection.query(
     `SELECT * FROM sessions WHERE token = $1`,
