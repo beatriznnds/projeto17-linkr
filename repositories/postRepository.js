@@ -14,10 +14,10 @@ async function addNewPost(
   );
 }
 
-async function editPost(description, publicationId, userId) {
+async function editPost(description, id) {
   return connection.query(
-    `UPDATE publications SET description = $1 WHERE id = $2 AND "userId" = $3`,
-    [description, publicationId, userId]
+    `UPDATE publications SET description = $1 WHERE id = $2`,
+    [description, id]
   );
 }
 

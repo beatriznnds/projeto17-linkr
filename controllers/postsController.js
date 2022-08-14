@@ -32,6 +32,7 @@ export async function newPost(req, res) {
 }
 
 export async function editPost(req, res) {
+  console.log(req.body)
   const { publicationId, description } = req.body;
   const { userId } = res.locals;
 
@@ -39,13 +40,14 @@ export async function editPost(req, res) {
     const { rows: validatePost } = await postRepository.searchPost(
       publicationId
     );
+
     if (validatePost.length === 0) {
       return res.sendStatus(404);
     }
     if (validatePost[0].userId !== userId) {
       return res.sendStatus(401);
     }
-    await postRepository.editPost(description, publicationId, userId);
+    await postRepository.editPost(description, publicationId);
     res.sendStatus(200);
   } catch (e) {
     console.log(e);
