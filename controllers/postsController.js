@@ -1,11 +1,18 @@
 import { postRepository } from "../repositories/postRepository.js";
 import urlMetadata from "url-metadata";
 import connection from "../database.js";
+import { hashtagRepository } from "../repositories/hashtagRepository.js";
 
 export async function newPost(req, res) {
   const { link, description } = req.body;
   const { userId } = res.locals;
+  const words = description.split(" ");
+  const hashtags = [];
+
   try {
+
+    
+    
     urlMetadata(link).then(
       async function (metadata) {
         // success handler
@@ -24,6 +31,17 @@ export async function newPost(req, res) {
         console.log(error);
       }
     );
+
+    for (let i = 0; i < words.length; i++) {
+      if (words[i][0] === "#") {
+        hashtags.push(words[i]);
+      }
+    }
+
+    for (let i = 0; i < hashtags.length; i++){
+      await hashtagRepository.createHashtag(hashtags[i].replace("#", "").toLowerCase());
+    }
+
     return res.sendStatus(201);
   } catch (e) {
     console.log(e);
@@ -35,6 +53,8 @@ export async function editPost(req, res) {
   console.log(req.body)
   const { publicationId, description } = req.body;
   const { userId } = res.locals;
+  const words = description.split(" ");
+  const hashtags = [];
 
   try {
     const { rows: validatePost } = await postRepository.searchPost(
@@ -47,7 +67,18 @@ export async function editPost(req, res) {
     if (validatePost[0].userId !== userId) {
       return res.sendStatus(401);
     }
+    
     await postRepository.editPost(description, publicationId);
+
+    for (let i = 0; i < words.length; i++) {
+      if (words[i][0] === "#") {
+        hashtags.push(words[i]);
+      }
+    }
+
+    for (let i = 0; i < hashtags.length; i++){
+      await hashtagRepository.createHashtag(hashtags[i].replace("#", "").toLowerCase());
+    }
     res.sendStatus(200);
   } catch (e) {
     console.log(e);
@@ -61,10 +92,7 @@ export async function deletePost(req, res) {
 
   const token = authorization?.replace("Bearer", "").trim();
 
-  const { rows: validToken } = await connection.query(
-    `SELECT * FROM sessions WHERE token = $1`,
-    [token]
-  );
+  const { rows: validToken } = await authRepository.searchToken(token);
 
   if (validToken.length === 0) {
     return res.sendStatus(401);

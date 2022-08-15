@@ -52,8 +52,18 @@ export async function hashtagTimeline(req, res){
     }
 
     const { rows: publications } = await timelineRepository.hashtagTimeline(hashtag);
+    publications.map((publication)=>{
+      publication.description = publication.description.concat(" ");
+    })
 
-    res.send([publications, hashtag]).status(200);
+    console.log(publications);
+    const publicationsArray = publications.filter((publication)=>{
+      return publication.description.toLowerCase().includes("#" + hashtag.toLowerCase() + " ")
+    })
+
+    console.log(publicationsArray, "#" + hashtag.toLowerCase())
+
+    res.send([publicationsArray, hashtag]).status(200);
   } catch {
     res.sendStatus(400);
   }
