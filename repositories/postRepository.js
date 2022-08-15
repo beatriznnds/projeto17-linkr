@@ -27,8 +27,8 @@ async function searchPost(publicationId) {
   ]);
 }
 
-async function searchPostById(id) {
-  return connection.query(`SELECT * FROM publications WHERE id = $1`, [id]);
+async function searchLastPost() {
+  return connection.query(`SELECT id FROM publications order by id DESC limit 1;`);
 }
 
 async function deletePost(publicationId) {
@@ -41,6 +41,6 @@ export const postRepository = {
   addNewPost,
   editPost,
   searchPost,
+  searchLastPost,
   deletePost,
-  searchPostById,
 };
