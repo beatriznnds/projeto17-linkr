@@ -10,7 +10,9 @@ export async function searchUser(req, res) {
         if (validToken.length === 0) {
             return res.sendStatus(404);
         }
+        console.log(validToken);
         const { rows: users } = await searchRepository.searchUser(nameSearch);
+        console.log(users);
         res.status(200).send(users);
     } catch (error) {
         console.log(error);

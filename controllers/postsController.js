@@ -1,4 +1,5 @@
 import { postRepository } from "../repositories/postRepository.js";
+import { authRepository } from "../repositories/authRepository.js"
 import urlMetadata from "url-metadata";
 import connection from "../database.js";
 import { hashtagRepository } from "../repositories/hashtagRepository.js";
@@ -10,10 +11,7 @@ export async function newPost(req, res) {
   const hashtags = [];
 
   try {
-
-    
-    
-    urlMetadata(link).then(
+    await urlMetadata(link).then(
       async function (metadata) {
         // success handler
 
@@ -50,7 +48,6 @@ export async function newPost(req, res) {
 }
 
 export async function editPost(req, res) {
-  console.log(req.body)
   const { publicationId, description } = req.body;
   const { userId } = res.locals;
   const words = description.split(" ");
@@ -116,4 +113,77 @@ export async function deletePost(req, res) {
     console.log(e);
     res.sendStatus(500);
   }
+}
+
+export async function likePost(req, res) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer", "").trim();
+  const { id } = req.params;
+
+  const { rows: validToken } = await connection.query(
+    `SELECT * FROM sessions WHERE token = $1`,
+    [token]
+  );
+
+  if (validToken.length === 0) {
+    return res.sendStatus(401);
+  }
+
+  try {
+    await connection.query(
+      'INSERT INTO likes ("userId", "publicationId") VALUES ($1, $2)',
+      [validToken[0].userId, id]
+    );
+    res.sendStatus(201);
+  } catch {
+    res.sendStatus(400);
+  }
+}
+
+export async function likeDelete(req, res) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer", "").trim();
+  const { id } = req.params;
+
+  const { rows: validToken } = await connection.query(
+    `SELECT * FROM sessions WHERE token = $1`,
+    [token]
+  );
+
+  if (validToken.length === 0) {
+    return res.sendStatus(401);
+  }
+
+  try {
+    await connection.query(
+      'DELETE FROM likes WHERE "userId" = $1 AND "publicationId" = $2',
+      [validToken[0].userId, id]
+    );
+
+    res.sendStatus(200);
+  } catch {
+    res.sendStatus(400);
+  }
+}
+
+export async function likeGet(req, res) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer", "").trim();
+  const { id } = req.params;
+  const { rows: validToken } = await connection.query(
+    `SELECT * FROM sessions WHERE token = $1`,
+    [token]
+  );
+
+  if (validToken.length === 0) {
+    return res.sendStatus(401);
+  }
+  const { rows: checkLike } = await connection.query(
+    'SELECT * FROM likes WHERE "publicationId" = $1 AND "userId" = $2',
+    [id, validToken[0].userId]
+  );
+  if (checkLike.length > 0) {
+    return res.send(true).status(200);
+  }
+  return res.send(false).status(200);
 }
