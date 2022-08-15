@@ -167,12 +167,11 @@ export async function getAllLikes (req, res) {
   try {
     let { rows: countLikes } = await connection.query(`SELECT publications.id, COUNT(publications.id) FROM publications JOIN likes ON publications.id = likes."publicationId" WHERE publications.id = $1 GROUP BY publications.id;`, [id]);
     const { rows: whoLiked } = await connection.query(`SELECT users.username as name, likes."publicationId" as postliked FROM likes JOIN users ON likes."userId" = users.id
-    WHERE likes."publicationId" = $1 GROUP BY name, likes."publicationId";`, [id])
-    res.send( { numberOfLikes: countLikes, peopleLiked: [whoLiked[0], whoLiked[1]] }).status(200);
-    console.log(countLikes)
+    WHERE likes."publicationId" = $1 GROUP BY name, likes."publicationId";`, [id]);
+    const count = countLikes[0]?.count || 0;
+    res.send( { numberOfLikes: parseInt(count), peopleLiked: whoLiked }).status(200);
   } catch (e) {
     console.log(e);
     res.sendStatus(500);
   }
-
 }
