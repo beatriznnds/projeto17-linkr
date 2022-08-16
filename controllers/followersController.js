@@ -5,7 +5,7 @@ export async function followUser (req, res) {
     const { userPageId } = req.body;
 
     if (userId === userPageId) {
-        return res.sendStatus(400);
+        return res.send('impossible').status(400);
     };
 
     try {
@@ -22,4 +22,21 @@ export async function followUser (req, res) {
         console.log(e);
         res.sendStatus(500);
     }
+}
+
+export async function checkFollow (req, res) {
+    const { userId }= res.locals;
+    const { userPageId } = req.query;
+    try {
+        const { rows: followers } = await connection.query(`SELECT * FROM followers WHERE "userId" = $1 AND "followedUserId" = $2`, [userId, userPageId]);
+        if (followers.length > 0) {
+            return res.send(true).status(200);
+        } else {
+            return res.send(false).status(200);
+        }        
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+
 }

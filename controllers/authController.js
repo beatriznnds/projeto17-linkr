@@ -31,6 +31,7 @@ export async function signIn(req, res) {
         token,
         name: userValidation[0].username,
         profilePic: userValidation[0].profilePic,
+        userId: userValidation[0].id
       })
       .status(200);
   } catch (e){
