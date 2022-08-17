@@ -38,5 +38,4 @@ export async function checkFollow (req, res) {
         console.log(e);
         res.sendStatus(500);
     }
-
 }
