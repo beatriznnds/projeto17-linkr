@@ -1,4 +1,5 @@
 import connection from "../database.js";
+import { followersRepository } from "../repositories/followersRepository.js";
 
 export async function followUser (req, res) {
     const { userId } = res.locals;
@@ -9,13 +10,13 @@ export async function followUser (req, res) {
     };
 
     try {
-        const { rows: followers } = await connection.query(`SELECT * FROM followers WHERE "userId" = $1 AND "followedUserId" = $2`, [userId, userPageId]);
+        const { rows: followers } = await followersRepository.checkFollowers(userId, userPageId);
 
         if (followers.length === 0) {
-            await connection.query(`INSERT INTO followers ("userId", "followedUserId") VALUES ($1, $2)`, [userId, userPageId]);
+            await followersRepository.followUser(userId, userPageId);
             return res.send('followed').status(200);
         } else {
-            await connection.query(`DELETE FROM followers WHERE "userId" = $1 AND "followedUserId" = $2`, [userId, userPageId]);
+            await followersRepository.unfollowUser(userId, userPageId)
             return res.send('unfollowed').status(200);
         }
     } catch (e) {
@@ -28,7 +29,7 @@ export async function checkFollow (req, res) {
     const { userId }= res.locals;
     const { userPageId } = req.query;
     try {
-        const { rows: followers } = await connection.query(`SELECT * FROM followers WHERE "userId" = $1 AND "followedUserId" = $2`, [userId, userPageId]);
+        const { rows: followers } = await followersRepository.checkFollowers(userId, userPageId);
         if (followers.length > 0) {
             return res.send(true).status(200);
         } else {

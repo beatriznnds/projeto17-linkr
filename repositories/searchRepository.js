@@ -5,7 +5,7 @@ async function searchUser(nameSearch){
 }
 
 async function searchFollowing (userId) {
-    return connection.query(`SELECT u1.id, u2.username, u2."profilePic", followers."followedUserId" as "isFollowing"
+    return connection.query(`SELECT u1.id AS "userSearching", u2.id, u2.username, u2."profilePic", followers."followedUserId" as "isFollowing"
     FROM users u1
     LEFT JOIN followers
     ON u1.id = followers."userId"
