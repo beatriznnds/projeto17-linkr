@@ -39,3 +39,19 @@ export async function checkFollow (req, res) {
         res.sendStatus(500);
     }
 }
+
+export async function checkIfUserFollows (req, res) {
+    const { userId } = res.locals;
+    try {
+        const { rows: following } = await connection.query(`SELECT * FROM followers WHERE "userId" = $1`, [userId]);
+        if (following.length === 0) {
+            return res.send(false).status(200);
+
+        } else {
+            return res.send(true).status(200);
+        }
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+}

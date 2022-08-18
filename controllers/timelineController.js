@@ -12,8 +12,8 @@ export async function timeline(req, res) {
     if (validToken.length === 0) {
       return res.sendStatus(401);
     }
-
-    const { rows: publications } = await timelineRepository.timeline();
+    
+    const { rows: publications } = await timelineRepository.timeline(validToken[0].userId);
 
     res.send(publications).status(200);
   } catch {
