@@ -15,7 +15,10 @@ export async function timeline(req, res) {
       return res.sendStatus(401);
     }
 
-    const { rows: publications } = await timelineRepository.timeline(page);
+    const { rows: publications } = await timelineRepository.timeline(
+      page,
+      validToken[0].userId
+    );
 
     res.send(publications).status(200);
   } catch {
