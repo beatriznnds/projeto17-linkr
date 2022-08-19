@@ -2,7 +2,9 @@ import connection from "../database.js";
 
 async function timeline(userId, page) {
   return connection.query(
-    `SELECT u1.id, u2.username, u2."profilePic", followers."followedUserId" as "isFollowing", p.id as "publicationId", p.link, p.description, p."urlTitle", p."urlImage", p."urlDescription"
+    `SELECT u1.id, u2.username, u2."profilePic", followers."followedUserId" as "isFollowing",
+    p.id as "publicationId", p.link, p.description, p."urlTitle", p."urlImage", p."urlDescription",
+    COUNT(l.id) as "howManyLikes"
         FROM users u1
         LEFT JOIN followers
         ON u1.id = followers."userId"
@@ -10,8 +12,11 @@ async function timeline(userId, page) {
         ON u2.id = followers."followedUserId"
         left join publications p
         on p."userId" = u2.id
+        join likes l
+        on l."publicationId" = p.id
         WHERE u1.id = $1
-        ORDER BY p."createdAt" desc LIMIT 10 OFFSET $2 * 10`,
+        group by u1.id, u2.username, u2."profilePic", followers."followedUserId", p.id
+        ORDER BY p."createdAt" desc LIMIT 10 OFFSET $2 * 10;`,
     [userId, page]
   );
 }
@@ -31,7 +36,7 @@ async function userCountTimeline(myId, lastId) {
   );
 }
 
-async function userTimeline(id) {
+async function userTimeline (id) {
   return connection.query(
     'SELECT publications.*, users."username", users."profilePic" FROM publications JOIN users ON publications."userId" = users.id WHERE users.id = $1 ORDER BY publications."createdAt" desc LIMIT 20',
     [id]
