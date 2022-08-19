@@ -118,7 +118,8 @@ export async function deletePost(req, res) {
 export async function likePost(req, res) {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer", "").trim();
-  const { id } = req.params;
+  const { publicationId } = req.body;
+  console.log(req);
 
   const { rows: validToken } = await connection.query(
     `SELECT * FROM sessions WHERE token = $1`,
@@ -132,10 +133,11 @@ export async function likePost(req, res) {
   try {
     await connection.query(
       'INSERT INTO likes ("userId", "publicationId") VALUES ($1, $2)',
-      [validToken[0].userId, id]
+      [validToken[0].userId, publicationId]
     );
     res.sendStatus(201);
-  } catch {
+  } catch (e) {
+    console.log(e);
     res.sendStatus(400);
   }
 }
