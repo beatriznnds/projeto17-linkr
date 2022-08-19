@@ -10,8 +10,12 @@ import {
 
 const timelineRouter = Router();
 
-timelineRouter.get("/timeline", timeline);
-timelineRouter.get("/timeline/:id", validateToken, countTimelinePublications);
+timelineRouter.get("/timeline/:page", timeline);
+timelineRouter.get(
+  "/countPublications/:id",
+  validateToken,
+  countTimelinePublications
+);
 timelineRouter.get("/user/:id", userTimeline);
 timelineRouter.get("/hashtag/:hashtag", hashtagTimeline);
 timelineRouter.get("/trendings", trendings);

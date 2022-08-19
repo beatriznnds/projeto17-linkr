@@ -3,21 +3,26 @@ import { authRepository } from "../repositories/authRepository.js";
 import { timelineRepository } from "../repositories/timelineRepository.js";
 
 export async function timeline(req, res) {
+  let { page } = req.params;
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer", "").trim();
 
   try {
     const { rows: validToken } = await authRepository.searchToken(token);
+    console.log(validToken);
 
     if (validToken.length === 0) {
       return res.sendStatus(401);
     }
-    
-    const { rows: publications } = await timelineRepository.timeline(validToken[0].userId);
+
+    const { rows: publications } = await timelineRepository.timeline(
+      page,
+      validToken[0].userId
+    );
 
     res.send(publications).status(200);
   } catch {
-    res.sendStatus(400);
+    res.sendStatus(500);
   }
 }
 
@@ -73,11 +78,13 @@ export async function hashtagTimeline(req, res) {
     );
     publications.map((publication) => {
       publication.description = publication.description.concat(" ");
-    })
+    });
 
-    const publicationsArray = publications.filter((publication)=>{
-      return publication.description.toLowerCase().includes("#" + hashtag.toLowerCase() + " ")
-    })
+    const publicationsArray = publications.filter((publication) => {
+      return publication.description
+        .toLowerCase()
+        .includes("#" + hashtag.toLowerCase() + " ");
+    });
 
     res.send([publicationsArray, hashtag]).status(200);
   } catch {
