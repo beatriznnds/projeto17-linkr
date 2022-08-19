@@ -16,10 +16,9 @@ export async function timeline(req, res) {
     }
 
     const { rows: publications } = await timelineRepository.timeline(
-      page,
-      validToken[0].userId
+      validToken[0].userId,
+      page
     );
-
     res.send(publications).status(200);
   } catch {
     res.sendStatus(500);
