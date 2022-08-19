@@ -12,8 +12,8 @@ async function unfollowUser (userId, userPageId) {
     return connection.query(`DELETE FROM followers WHERE "userId" = $1 AND "followedUserId" = $2`, [userId, userPageId]);
 }
  
-export const followersRepository = [
+export const followersRepository = {
     checkFollowers,
     followUser,
     unfollowUser
-]
+}
