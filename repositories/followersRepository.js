@@ -16,4 +16,4 @@ export const followersRepository = {
     checkFollowers,
     followUser,
     unfollowUser
-};
+}
