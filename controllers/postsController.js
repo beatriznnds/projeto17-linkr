@@ -144,6 +144,7 @@ export async function likeDelete(req, res) {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer", "").trim();
   const { id } = req.params;
+  console.log(id);
 
   const { rows: validToken } = await connection.query(
     `SELECT * FROM sessions WHERE token = $1`,
