@@ -1,9 +1,17 @@
 import connection from "../database.js";
 
-async function timeline(){
+async function timeline(userId){
     return connection.query(
-        'SELECT publications.*, users."username", users."profilePic" FROM publications JOIN users ON publications."userId" = users.id ORDER BY publications."createdAt" desc LIMIT 20'
-      );
+        `SELECT u1.id, u2.username, u2."profilePic", followers."followedUserId" as "isFollowing", p.id as "publicationId", p.link, p.description, p."urlTitle", p."urlImage", p."urlDescription"
+        FROM users u1
+        LEFT JOIN followers
+        ON u1.id = followers."userId"
+        LEFT JOIN users u2
+        ON u2.id = followers."followedUserId"
+        left join publications p
+        on p."userId" = u2.id
+        WHERE u1.id = $1`, [userId]
+    );
 }
 
 async function userTimeline(id){
