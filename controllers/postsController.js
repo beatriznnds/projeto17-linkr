@@ -48,14 +48,14 @@ export async function newPost(req, res) {
 }
 
 export async function editPost(req, res) {
-  const { publicationId, description } = req.body;
+  const { id, description } = req.body;
   const { userId } = res.locals;
   const words = description.split(" ");
   const hashtags = [];
 
   try {
     const { rows: validatePost } = await postRepository.searchPost(
-      publicationId
+      id
     );
 
     if (validatePost.length === 0) {
@@ -65,7 +65,7 @@ export async function editPost(req, res) {
       return res.sendStatus(401);
     }
     
-    await postRepository.editPost(description, publicationId);
+    await postRepository.editPost(description, id);
 
     for (let i = 0; i < words.length; i++) {
       if (words[i][0] === "#") {
@@ -85,7 +85,7 @@ export async function editPost(req, res) {
 
 export async function deletePost(req, res) {
   const { authorization } = req.headers;
-  const { publicationId } = req.body;
+  const { id } = req.body;
 
   const token = authorization?.replace("Bearer", "").trim();
 
@@ -99,7 +99,7 @@ export async function deletePost(req, res) {
 
   try {
     const { rows: validatePost } = await postRepository.searchPost(
-      publicationId
+      id
     );
     if (validatePost.length === 0) {
       return res.sendStatus(404);
@@ -107,7 +107,7 @@ export async function deletePost(req, res) {
     if (validatePost[0].userId !== userId) {
       return res.sendStatus(401);
     }
-    await postRepository.deletePost(publicationId);
+    await postRepository.deletePost(id);
     res.sendStatus(200);
   } catch (e) {
     console.log(e);
@@ -118,7 +118,7 @@ export async function deletePost(req, res) {
 export async function likePost(req, res) {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer", "").trim();
-  const { publicationId } = req.body;
+  const { id } = req.body;
   console.log(req);
 
   const { rows: validToken } = await connection.query(
@@ -133,7 +133,7 @@ export async function likePost(req, res) {
   try {
     await connection.query(
       'INSERT INTO likes ("userId", "publicationId") VALUES ($1, $2)',
-      [validToken[0].userId, publicationId]
+      [validToken[0].userId, id]
     );
     res.sendStatus(201);
   } catch (e) {
