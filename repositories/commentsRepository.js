@@ -15,7 +15,7 @@ async function getComments(publicationId) {
         ON comments."publicationId" = publications.id 
         JOIN users
         ON comments."userId" = users.id 
-        WHERE comments."publicationId" = $1
+        WHERE publications.id = $1
         ORDER BY comments."createdAt" 
     `, [publicationId]);
 }
