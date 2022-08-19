@@ -27,12 +27,20 @@ export async function timeline(req, res) {
 
 export async function countTimelinePublications(req, res) {
   const { id } = req.params;
-  console.log(id);
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer", "").trim();
+
+  const { rows: validToken } = await authRepository.searchToken(token);
+  console.log(validToken);
+
+  if (validToken.length === 0) {
+    return res.sendStatus(401);
+  }
 
   try {
-    const { rows: count } = await connection.query(
-      "SELECT COUNT(publications.id) as count FROM publications WHERE ID > $1",
-      [id]
+    const { rows: count } = await timelineRepository.userCountTimeline(
+      validToken[0].userId,
+      id
     );
     console.log(count);
     res.send(count).status(200);

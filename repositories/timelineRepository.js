@@ -16,6 +16,21 @@ async function timeline(userId, page) {
   );
 }
 
+async function userCountTimeline(myId, lastId) {
+  return connection.query(
+    `SELECT COUNT(p.id)
+  FROM users u1
+  LEFT JOIN followers
+  ON u1.id = followers."userId"
+  LEFT JOIN users u2
+  ON u2.id = followers."followedUserId"
+  left join publications p
+  on p."userId" = u2.id
+  WHERE u1.id = $1 and p.id > $2`,
+    [myId, lastId]
+  );
+}
+
 async function userTimeline(id) {
   return connection.query(
     'SELECT publications.*, users."username", users."profilePic" FROM publications JOIN users ON publications."userId" = users.id WHERE users.id = $1 ORDER BY publications."createdAt" desc LIMIT 20',
@@ -41,4 +56,5 @@ export const timelineRepository = {
   userTimeline,
   hashtagTimeline,
   trendings,
+  userCountTimeline,
 };
